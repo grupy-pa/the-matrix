@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Chosen Palette: Deep Cyberspace (Matrix Green, Black, Grey, with Red/Blue accents) -->
+    <!-- Application Structure Plan: A thematic, single-page application with a sticky navigation. The user journey begins with the iconic "red pill/blue pill" choice, which unlocks the main analysis. This interactive gateway makes the user an active participant. The content is divided into logical, non-linear sections (Hacker Culture, Trans Allegory, Philosophy) allowing users to explore topics of interest freely. This structure is more engaging than a linear report and better suits the exploration of distinct, deep themes. -->
+    <!-- Visualization & Content Choices: Report Info: Trans Allegory -> Goal: Organize & Explain -> Viz: Interactive Polar Area Chart (Chart.js) -> Interaction: Click slices to display detailed text -> Justification: Shows interconnected pillars of a complex theory in a visually engaging way. Report Info: Hacker Network -> Goal: Show Relationships -> Viz: HTML/CSS Diagram -> Interaction: Hover to highlight nodes/connections -> Justification: Simple, lightweight alternative to SVG for showing character relationships. Report Info: Philosophical Flow -> Goal: Show Process -> Viz: HTML/CSS Flowchart -> Justification: Clearly visualizes the film's core philosophical progression without complex libraries. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <title>Análise Interativa de Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #000000;
+            color: #E0E0E0;
+        }
+        .matrix-green { color: #00FF41; }
+        .matrix-green-bg { background-color: #00FF41; }
+        .matrix-card { background-color: rgba(17, 24, 39, 0.8); backdrop-filter: blur(5px); border: 1px solid #00FF41; }
+        .nav-link { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
+        .nav-link:hover, .nav-link.active { color: #00FF41; border-bottom-color: #00FF41; }
+        .pill-button { transition: all 0.3s ease; }
+        .pill-button:hover { transform: scale(1.05); box-shadow: 0 0 15px currentColor; }
+        .content-section { display: none; }
+        #digital-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            min-height: 300px;
+            margin: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-black">
+    <canvas id="digital-rain"></canvas>
+
+    <header id="header" class="text-center py-12 px-4 relative">
+        <h1 class="text-4xl md:text-6xl font-bold matrix-green mb-4 tracking-widest">MATRIX</h1>
+        <p class="text-lg md:text-xl text-gray-300">Desvendando os Códigos: Uma Análise Interativa</p>
+    </header>
+
+    <main id="main-content" class="container mx-auto px-4 pb-16">
+        <section id="choice-section" class="text-center py-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4">O que é a Matrix?</h2>
+            <p class="max-w-2xl mx-auto mb-8 text-gray-400">A resposta está lá fora, Neo. Ela está te procurando, e ela te encontrará se você quiser. Mas primeiro, você precisa fazer uma escolha.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                <div class="text-center">
+                    <button id="blue-pill" class="pill-button w-48 h-20 rounded-full text-white font-bold text-lg shadow-lg bg-blue-600">
+                        A Pílula Azul
+                    </button>
+                    <p class="mt-4 text-gray-400 max-w-xs">A história acaba. Você acorda na sua cama e acredita no que quiser.</p>
+                </div>
+                <div class="text-center">
+                    <button id="red-pill" class="pill-button w-48 h-20 rounded-full text-white font-bold text-lg shadow-lg bg-red-600">
+                        A Pílula Vermelha
+                    </button>
+                    <p class="mt-4 text-gray-400 max-w-xs">Você fica no País das Maravilhas, e eu te mostro até onde vai a toca do coelho.</p>
+                </div>
+            </div>
+            <div id="blue-pill-message" class="hidden mt-8 max-w-md mx-auto p-4 matrix-card border-blue-500">
+                <p class="text-blue-400">A ignorância é uma bênção...</p>
+            </div>
+        </section>
+
+        <div id="analysis-content" class="hidden">
+            <nav id="navbar" class="sticky top-0 bg-black bg-opacity-80 backdrop-blur-md z-10 mb-12">
+                <div class="container mx-auto px-4">
+                    <div class="flex justify-center items-center h-16">
+                        <a href="#hacker-section" class="nav-link px-4 py-2 text-sm md:text-base">Cultura Hacker</a>
+                        <a href="#allegory-section" class="nav-link px-4 py-2 text-sm md:text-base">Alegoria Trans</a>
+                        <a href="#philosophy-section" class="nav-link px-4 py-2 text-sm md:text-base">Filosofia & Tecnologia</a>
+                    </div>
+                </div>
+            </nav>
+
+            <section id="hacker-section" class="content-section py-12 scroll-mt-20">
+                 <h2 class="text-3xl font-bold matrix-green text-center mb-4">Rebelião Digital: A Cultura Hacker</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-gray-300">
+                    Matrix não é apenas sobre a realidade ser uma simulação; é fundamentalmente uma história sobre a cultura hacker dos anos 90. O filme captura o espírito de rebeldia, o questionamento de sistemas de controle e a crença de que a informação quer ser livre. Neo começa como um pária digital, um reflexo do arquétipo do hacker que vê através das fachadas da sociedade.
+                </p>
+                <div class="matrix-card p-6 md:p-8 rounded-lg">
+                    <h3 class="text-xl font-bold matrix-green mb-4">Os Pilares do Ethos Hacker no Filme:</h3>
+                    <ul class="space-y-4">
+                        <li>
+                            <p><strong class="matrix-green">> Anti-Autoritarismo:</strong> A luta contra as Máquinas e seus Agentes é uma metáfora direta da batalha dos hackers contra corporações e governos que buscam controlar o fluxo de informação e a liberdade individual.</p>
+                        </li>
+                        <li>
+                            <p><strong class="matrix-green">> Identidade e Anonimato:</strong> Thomas Anderson é o nome "dado pelo sistema". 'Neo' (um anagrama para 'One', o escolhido) é sua verdadeira identidade, seu "handle" de hacker. Essa dualidade era central na cultura online primitiva, onde o alter-ego digital permitia a exploração de uma identidade mais autêntica.</p>
+                        </li>
+                        <li>
+                            <p><strong class="matrix-green">> Exploração e Conhecimento:</strong> O desejo de Neo de descobrir "o que é a Matrix" ecoa a curiosidade insaciável dos hackers em entender como os sistemas funcionam para poder contorná-los e modificá-los. A frase "Siga o coelho branco" é um convite à exploração do desconhecido.</p>
+                        </li>
+                         <li>
+                            <p><strong class="matrix-green">> A Pílula como Metáfora de "Insight":</strong> Na cultura hacker, a "pílula vermelha" pode ser vista como o momento de epifania, quando se compreende uma falha crítica em um sistema (o "exploit"), abrindo portas para uma nova percepção da realidade e do que é possível fazer dentro dela.</p>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="allegory-section" class="content-section py-12 scroll-mt-20">
+                <h2 class="text-3xl font-bold matrix-green text-center mb-4">A Jornada da Identidade: A Alegoria Trans</h2>
+                <p class="text-center max-w-3xl mx-auto mb-10 text-gray-300">
+                    Confirmado pelas próprias diretoras, Matrix é uma poderosa alegoria sobre a experiência transgênero. A jornada de Neo para se libertar de um mundo fabricado que o oprime reflete profundamente a luta pela autodescoberta e aceitação da própria identidade. Esta seção explora os pilares dessa interpretação. Clique em uma fatia do gráfico para ver a análise.
+                </p>
+                <div class="flex flex-col lg:flex-row items-center gap-8">
+                    <div class="w-full lg:w-1/2">
+                        <div class="chart-container">
+                            <canvas id="allegory-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="w-full lg:w-1/2">
+                        <div id="allegory-info" class="matrix-card p-6 rounded-lg min-h-[300px]">
+                            <h3 id="allegory-title" class="text-xl font-bold matrix-green mb-4">Pilares da Alegoria</h3>
+                            <p id="allegory-text" class="text-gray-300">O gráfico ao lado ilustra os conceitos centrais da leitura de Matrix como uma alegoria trans. Cada elemento da jornada de Neo pode ser mapeado para um aspecto da transição de gênero e da luta por reconhecimento em um mundo que impõe identidades.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="philosophy-section" class="content-section py-12 scroll-mt-20">
+                <h2 class="text-3xl font-bold matrix-green text-center mb-4">O Deserto do Real: Filosofia e Tecnologia</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-gray-300">
+                    Matrix popularizou debates filosóficos complexos sobre a natureza da realidade, fortemente influenciado por pensadores como Jean Baudrillard e sua teoria da "Simulacra e Simulação". O filme questiona o que resta do "real" em uma era saturada pela tecnologia, onde as cópias e simulações podem se tornar mais reais do que o original.
+                </p>
+                <div class="matrix-card p-6 md:p-8 rounded-lg">
+                    <h3 class="text-xl font-bold matrix-green mb-4">A Progressão Filosófica:</h3>
+                    <div class="flex flex-col md:flex-row justify-between items-center text-center space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold">A Realidade Percebida</h4>
+                            <p class="text-gray-400 text-sm">O mundo como o conhecemos. Um sistema de regras, trabalho e rotina que parece concreto e inquestionável.</p>
+                        </div>
+                        <div class="matrix-green text-4xl font-mono mx-4">&gt;&gt;</div>
+                        <div class="flex-1">
+                             <h4 class="text-lg font-bold">A Simulação (Matrix)</h4>
+                             <p class="text-gray-400 text-sm">A revelação de que a realidade percebida é uma construção, uma simulação neural interativa projetada para controlar a humanidade.</p>
+                        </div>
+                        <div class="matrix-green text-4xl font-mono mx-4">&gt;&gt;</div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold">O Deserto do Real</h4>
+                            <p class="text-gray-400 text-sm">A dura verdade por trás da simulação. Um mundo pós-apocalíptico onde a realidade é crua, difícil, mas autêntica. É a escolha pela verdade, por mais dolorosa que seja.</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 border-t border-gray-700 pt-6">
+                         <p><strong class="matrix-green">> Crítica à Tecnologia:</strong> O filme é profético ao antecipar nossa dependência de mundos digitais. A Matrix pode ser vista como uma metáfora para a internet, redes sociais e o metaverso — realidades virtuais onde passamos a maior parte de nossas vidas, muitas vezes em detrimento do mundo físico.</p>
+                         <p class="mt-4"><strong class="matrix-green">> Adolescência e Alienação:</strong> A jornada de Neo também espelha a angústia adolescente: o sentimento de não pertencer, a sensação de que o mundo adulto é falso e a busca por uma "tribo" ou grupo que compartilhe da mesma visão de mundo (a tripulação da Nabucodonosor).</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="text-center p-4 text-xs text-gray-600">
+        <p>Análise criada como uma exploração interativa das temáticas de The Matrix (1999).</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('digital-rain');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = [];
+
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00FF41';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        setInterval(draw, 33);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const redPillBtn = document.getElementById('red-pill');
+        const bluePillBtn = document.getElementById('blue-pill');
+        const bluePillMsg = document.getElementById('blue-pill-message');
+        const analysisContent = document.getElementById('analysis-content');
+        const choiceSection = document.getElementById('choice-section');
+
+        redPillBtn.addEventListener('click', () => {
+            choiceSection.style.transition = 'opacity 0.5s ease-out';
+            choiceSection.style.opacity = '0';
+            setTimeout(() => {
+                choiceSection.classList.add('hidden');
+                analysisContent.classList.remove('hidden');
+                analysisContent.style.opacity = '0';
+                analysisContent.style.transition = 'opacity 1s ease-in';
+                setTimeout(() => {
+                    analysisContent.style.opacity = '1';
+                    document.getElementById('hacker-section').style.display = 'block';
+                    document.querySelector('.nav-link').classList.add('active');
+                }, 50);
+            }, 500);
+        });
+
+        bluePillBtn.addEventListener('click', () => {
+            bluePillMsg.classList.remove('hidden');
+            setTimeout(() => {
+                bluePillMsg.classList.add('hidden');
+            }, 3000);
+        });
+
+        const allegoryData = {
+            labels: [
+                'Disfonia de Realidade',
+                'O Nome Escolhido',
+                'A Pílula (Transição)',
+                'Agentes (Opressão)',
+                'Switch & Dualidade',
+                'Construindo o "Eu" Real',
+            ],
+            datasets: [{
+                label: 'Pilares da Alegoria Trans',
+                data: [10, 10, 10, 10, 10, 10],
+                backgroundColor: [
+                    'rgba(0, 255, 65, 0.5)',
+                    'rgba(65, 0, 255, 0.5)',
+                    'rgba(255, 0, 65, 0.5)',
+                    'rgba(255, 255, 0, 0.5)',
+                    'rgba(0, 255, 255, 0.5)',
+                    'rgba(255, 0, 255, 0.5)',
+                ],
+                borderColor: '#E0E0E0',
+                borderWidth: 1,
+            }]
+        };
+
+        const allegoryInfoContent = {
+            'Disfonia de Realidade': {
+                title: 'Disfonia de Realidade',
+                text: 'O sentimento persistente de Neo de que "há algo de errado com o mundo" é uma metáfora para a disforia de gênero — a profunda sensação de que o corpo ou a identidade de gênero atribuída no nascimento não corresponde à sua verdadeira identidade.'
+            },
+            'O Nome Escolhido': {
+                title: 'O Nome Escolhido (Neo vs. Anderson)',
+                text: 'Agente Smith insiste em chamá-lo de "Mr. Anderson", seu "deadname" — o nome que lhe foi imposto pelo sistema. "Neo" é o nome que ele escolheu, sua verdadeira identidade. A luta para ser chamado pelo nome certo é uma experiência central para pessoas trans.'
+            },
+            'A Pílula (Transição)': {
+                title: 'A Pílula Vermelha como Transição',
+                text: 'Lilly Wachowski mencionou que a pílula vermelha pode ser vista como uma metáfora para o início da terapia hormonal. É o ato de iniciar uma transformação, tanto física quanto de consciência, para alinhar o corpo e a mente com o "eu" verdadeiro.'
+            },
+            'Agentes (Opressão)': {
+                title: 'Agentes como Opressão Sistêmica',
+                text: 'Os Agentes representam as forças da sociedade que tentam impor conformidade e binarismo. Eles policiam as regras da Matrix e punem qualquer desvio, assim como as normas sociais podem oprimir e marginalizar identidades trans e não-conformes.'
+            },
+            'Switch & Dualidade': {
+                title: 'Switch e a Dualidade de Gênero',
+                text: 'No roteiro original, a personagem Switch seria interpretada por um homem no mundo real e uma mulher dentro da Matrix, representando a dualidade entre a identidade interna e a expressão externa. O estúdio vetou a ideia, mas a intenção permaneceu.'
+            },
+            'Construindo o "Eu" Real': {
+                title: 'Construindo o "Eu" Real',
+                text: 'Uma vez fora da Matrix, Neo precisa aprender a controlar sua mente e corpo no novo "real". Isso espelha o processo de transição, que não é apenas uma mudança física, mas uma jornada de autoconhecimento e construção de uma vida autêntica fora das expectativas impostas.'
+            }
+        };
+
+        const allegoryChartCtx = document.getElementById('allegory-chart')?.getContext('2d');
+        let myAllegoryChart;
+
+        if (allegoryChartCtx) {
+            myAllegoryChart = new Chart(allegoryChartCtx, {
+                type: 'polarArea',
+                data: allegoryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            display: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#E0E0E0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const elementIndex = elements[0].index;
+                            const label = allegoryData.labels[elementIndex];
+                            const content = allegoryInfoContent[label];
+                            document.getElementById('allegory-title').innerText = content.title;
+                            document.getElementById('allegory-text').innerText = content.text;
+                        }
+                    }
+                }
+            });
+        }
+        
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.content-section');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                
+                sections.forEach(section => {
+                    if ('#' + section.id === targetId) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+
+                document.querySelector(targetId).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+
+    </script>
+</body>
+</html>
